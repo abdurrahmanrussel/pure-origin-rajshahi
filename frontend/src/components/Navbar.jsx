@@ -1,119 +1,127 @@
-import React, { useState, useEffect } from 'react'
-import logo from '../assets/logo.png'
-import Button from './Button'
-import { useLocation, useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useState, useEffect } from 'react'
 
-const Navbar = ({ showAllProducts }) => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { user, isAuthenticated, logout, hasRole } = useAuth()
+const WA = 'https://wa.me/8801931112866'
 
-  const handleLogout = () => {
-    logout()
-    navigate('/')
-  }
+const LINKS = [
+  { label: 'আমাদের আম', href: '#products' },
+  { label: 'কেন আমরা', href: '#why-us' },
+  { label: 'অর্ডার', href: '#how-to-order' },
+  { label: 'রিভিউ', href: '#reviews' },
+  { label: 'যোগাযোগ', href: '#contact' },
+]
 
-  const handleLogoClick = () => {
-    if (location.pathname === '/') {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    } else {
-      navigate('/')
-    }
-  }
+export default function Navbar() {
+  const [scrolled, setScrolled] = useState(false)
+  const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 60)
+    window.addEventListener('scroll', fn, { passive: true })
+    return () => window.removeEventListener('scroll', fn)
+  }, [])
+
+  const navBg = scrolled
+    ? 'rgba(15,35,24,0.96)'
+    : 'transparent'
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <>
+      <style>{`
+        .nav-link { transition: color 0.25s; }
+        .nav-link:hover { color: var(--gold-400) !important; }
+        .nav-cta { transition: transform 0.2s, box-shadow 0.2s; }
+        .nav-cta:hover { transform: scale(1.04); box-shadow: 0 4px 22px rgba(201,150,10,0.38); }
+        @media (max-width: 860px) {
+          .nav-desktop { display: none !important; }
+          .nav-hamburger { display: flex !important; }
+        }
+        @media (min-width: 861px) {
+          .nav-mobile-menu { display: none !important; }
+          .nav-hamburger { display: none !important; }
+        }
+      `}</style>
+
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        background: navBg,
+        backdropFilter: scrolled ? 'blur(14px)' : 'none',
+        boxShadow: scrolled ? '0 2px 28px rgba(0,0,0,0.32)' : 'none',
+        borderBottom: scrolled ? '1px solid rgba(201,150,10,0.14)' : '1px solid transparent',
+        transition: 'all 0.4s ease',
+      }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 72 }}>
+
           {/* Logo */}
-          <div onClick={handleLogoClick} className="flex items-center gap-2 cursor-pointer">
-            <img src={logo} alt="NetVibeBD Logo" className="h-8 w-8" />
-            <span className="font-bold text-lg text-gray-900">NetVibeBD</span>
+          <a href="#" style={{ textDecoration: 'none' }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 21, fontWeight: 500, letterSpacing: '0.14em', color: 'var(--gold-400)', lineHeight: 1.2 }}>
+              Pure Origin
+            </div>
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, letterSpacing: '0.4em', textTransform: 'uppercase', color: 'var(--text-muted)', marginTop: 2 }}>
+              Rajshahi
+            </div>
+          </a>
+
+          {/* Desktop nav */}
+          <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+            {LINKS.map(l => (
+              <a key={l.href} href={l.href} className="nav-link"
+                style={{ fontFamily: 'var(--font-bn)', fontSize: 14, color: 'var(--text-muted)', textDecoration: 'none' }}>
+                {l.label}
+              </a>
+            ))}
+            <a href={WA} target="_blank" rel="noopener noreferrer" className="nav-cta"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 20px',
+                borderRadius: 9999, background: 'linear-gradient(135deg,var(--gold-500),var(--gold-300))',
+                color: 'var(--c-950)', fontFamily: 'var(--font-bn)', fontSize: 13, fontWeight: 700, textDecoration: 'none',
+              }}>
+              <WAIcon /> অর্ডার করুন
+            </a>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            <button onClick={() => navigate('/')} className="text-gray-700 hover:text-blue-600">Products</button>
-            <a href="#reviews" className="text-gray-700 hover:text-blue-600">Reviews</a>
-            <Link to="/contact" className="text-gray-700 hover:text-blue-600">Contact</Link>
-          </nav>
-
-          {/* Desktop Auth */}
-          <div className="hidden md:flex items-center gap-4">
-            {isAuthenticated ? (
-              <>
-                {hasRole('admin') && <Link to="/admin" className="text-purple-600 font-medium">Admin</Link>}
-                <Link to="/dashboard" className="text-green-600 font-medium">Dashboard</Link>
-                <Link to="/account/settings" className="text-blue-600 font-medium">Settings</Link>
-                <span className="text-gray-700">Hi, {user?.name}</span>
-                <Button onClick={handleLogout} className="text-blue-600">Logout</Button>
-              </>
-            ) : (
-              <>
-                <Link to="/login"><Button className="text-blue-600">Login</Button></Link>
-                <Link to="/register"><Button className="bg-blue-600 text-white">Sign Up</Button></Link>
-              </>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {mobileMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
+          {/* Hamburger */}
+          <button className="nav-hamburger" onClick={() => setOpen(v => !v)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, flexDirection: 'column', gap: 5 }}
+            aria-label="Toggle menu">
+            <span style={{ display: 'block', width: 24, height: 2, background: 'var(--gold-400)', transition: 'all 0.3s', transform: open ? 'rotate(45deg) translate(5px,5px)' : 'none' }} />
+            <span style={{ display: 'block', width: 18, height: 2, background: 'var(--gold-400)', transition: 'all 0.3s', opacity: open ? 0 : 1 }} />
+            <span style={{ display: 'block', width: open ? 24 : 12, height: 2, background: 'var(--gold-400)', transition: 'all 0.3s', transform: open ? 'rotate(-45deg) translate(5px,-5px)' : 'none' }} />
           </button>
         </div>
-      </div>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden fixed right-0 top-16 h-[calc(100vh-4rem)] w-80 max-w-[85vw] bg-white border-l shadow-lg overflow-y-auto">
-          <nav className="px-4 py-4 space-y-3">
-            <button onClick={() => { setMobileMenuOpen(false); navigate('/') }} className="block w-full text-left py-2 text-gray-700">Products</button>
-            <button onClick={() => { setMobileMenuOpen(false); navigate('/#reviews') }} className="block w-full text-left py-2 text-gray-700">Reviews</button>
-            <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left py-2 text-gray-700">About Us</Link>
-            <Link to="/faq" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left py-2 text-gray-700">FAQ</Link>
-            <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left py-2 text-gray-700">Contact</Link>
-            
-            <div className="border-t pt-3 mt-3 space-y-2">
-              <Link to="/terms" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left py-2 text-sm text-gray-600">Terms & Conditions</Link>
-              <Link to="/privacy" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left py-2 text-sm text-gray-600">Privacy Policy</Link>
-              <Link to="/refund" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left py-2 text-sm text-gray-600">Refund Policy</Link>
-            </div>
-
-            <div className="border-t pt-3 mt-3 space-y-2">
-              {isAuthenticated ? (
-                <>
-                  {hasRole('admin') && <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left py-2 text-purple-600 font-medium">Admin Dashboard</Link>}
-                  <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left py-2 text-green-600 font-medium">Dashboard</Link>
-                  <Link to="/account/settings" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left py-2 text-blue-600 font-medium">Settings</Link>
-                  <div className="py-2 text-gray-700">
-                    <span className="font-medium">Hi, {user?.name}</span>
-                  </div>
-                  <Button onClick={handleLogout} className="w-full bg-red-50 text-red-600">Logout</Button>
-                </>
-              ) : (
-                <>
-                  <div className="py-4 text-center bg-gray-50 rounded-lg">
-                    <p className="font-medium text-gray-900">Welcome!</p>
-                    <p className="text-sm text-gray-600">Sign in to access your account</p>
-                  </div>
-                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}><Button className="w-full border-2 border-blue-600 text-blue-600">Login</Button></Link>
-                  <Link to="/register" onClick={() => setMobileMenuOpen(false)}><Button className="w-full bg-blue-600 text-white">Sign Up</Button></Link>
-                </>
-              )}
-            </div>
-          </nav>
+        {/* Mobile drawer */}
+        <div className="nav-mobile-menu" style={{
+          overflow: 'hidden', maxHeight: open ? 380 : 0, transition: 'max-height 0.38s ease',
+          borderTop: open ? '1px solid rgba(201,150,10,0.14)' : 'none',
+          background: 'rgba(15,35,24,0.98)',
+        }}>
+          <div style={{ padding: '16px 28px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+            {LINKS.map(l => (
+              <a key={l.href} href={l.href} onClick={() => setOpen(false)}
+                style={{ fontFamily: 'var(--font-bn)', fontSize: 15, color: 'var(--text-muted)', textDecoration: 'none' }}>
+                {l.label}
+              </a>
+            ))}
+            <a href={WA} target="_blank" rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 22px',
+                borderRadius: 9999, background: 'linear-gradient(135deg,var(--gold-500),var(--gold-300))',
+                color: 'var(--c-950)', fontFamily: 'var(--font-bn)', fontSize: 14, fontWeight: 700,
+                textDecoration: 'none', width: 'fit-content', marginTop: 4,
+              }}>
+              <WAIcon /> অর্ডার করুন
+            </a>
+          </div>
         </div>
-      )}
-    </header>
+      </nav>
+    </>
   )
 }
 
-export default Navbar
+function WAIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+  )
+}

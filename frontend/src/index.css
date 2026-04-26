@@ -1,1 +1,156 @@
 @import "tailwindcss";
+
+:root {
+  --c-950: #060f09;
+  --c-900: #0f2318;
+  --c-800: #1a3a28;
+  --c-700: #234f36;
+  --c-600: #2d6445;
+  --c-500: #3d7a55;
+  --gold-600: #a87a08;
+  --gold-500: #c9960a;
+  --gold-400: #e8b84b;
+  --gold-300: #f5d06e;
+  --gold-200: #fae7a8;
+  --cream: #fef8ed;
+  --text-light: #f0e6cc;
+  --text-muted: #9e8a6a;
+  --text-dim: #6b5a40;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-bn: 'Noto Serif Bengali', serif;
+  --font-body: 'Lato', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--c-900);
+  color: var(--text-light);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Typography helpers ─────────────────────────────── */
+.font-display { font-family: var(--font-display); }
+.font-bn      { font-family: var(--font-bn); }
+
+/* ── Gold gradient text ─────────────────────────────── */
+.gold-text {
+  background: linear-gradient(135deg, var(--gold-500) 0%, var(--gold-300) 50%, var(--gold-500) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Gold border via background-clip ───────────────── */
+.gold-border {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--c-800), var(--c-800)) padding-box,
+    linear-gradient(135deg, var(--gold-500), var(--gold-300), var(--gold-500)) border-box;
+}
+.gold-border-dark {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--c-900), var(--c-900)) padding-box,
+    linear-gradient(135deg, var(--gold-500), var(--gold-300), var(--gold-500)) border-box;
+}
+
+/* ── Grain texture ──────────────────────────────────── */
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  opacity: 0.07;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Scroll reveal ──────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.75s ease, transform 0.75s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.delay-1 { transition-delay: 0.10s; }
+.delay-2 { transition-delay: 0.20s; }
+.delay-3 { transition-delay: 0.30s; }
+.delay-4 { transition-delay: 0.40s; }
+.delay-5 { transition-delay: 0.50s; }
+.delay-6 { transition-delay: 0.60s; }
+
+/* ── Marquee ────────────────────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+.marquee-track:hover { animation-play-state: paused; }
+
+/* ── Float animations ───────────────────────────────── */
+@keyframes floatA {
+  0%, 100% { transform: translateY(0)    rotate(0deg);  }
+  40%      { transform: translateY(-18px) rotate(6deg);  }
+  70%      { transform: translateY(-9px)  rotate(-4deg); }
+}
+@keyframes floatB {
+  0%, 100% { transform: translateY(0)    rotate(0deg);  }
+  35%      { transform: translateY(-14px) rotate(-5deg); }
+  65%      { transform: translateY(-6px)  rotate(3deg);  }
+}
+@keyframes floatC {
+  0%, 100% { transform: translateY(0)    rotate(0deg);  }
+  50%      { transform: translateY(-22px) rotate(8deg);  }
+}
+.float-a { animation: floatA 7s  ease-in-out infinite; }
+.float-b { animation: floatB 9s  ease-in-out 1.5s infinite; }
+.float-c { animation: floatC 11s ease-in-out 3s   infinite; }
+
+/* ── Card shine on hover ────────────────────────────── */
+.shine {
+  position: relative;
+  overflow: hidden;
+}
+.shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 50%, transparent 60%);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+.shine:hover::after { transform: translateX(100%); }
+
+/* ── Pulse glow for CTA ─────────────────────────────── */
+@keyframes pulseGold {
+  0%, 100% { box-shadow: 0 0 0 0   rgba(201,150,10,0.45); }
+  50%      { box-shadow: 0 0 0 14px rgba(201,150,10,0); }
+}
+.pulse-gold { animation: pulseGold 2.8s ease-in-out infinite; }
+
+/* ── Section divider wave ───────────────────────────── */
+.wave-top {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+.wave-top svg { display: block; }
+
+/* ── Utility ────────────────────────────────────────── */
+.section-pad { padding: 96px 0; }
+@media (max-width: 768px) { .section-pad { padding: 64px 0; } }

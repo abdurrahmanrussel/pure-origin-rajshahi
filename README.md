@@ -1,219 +1,117 @@
-# NetVibeBD Website
+# Pure Origin Rajshahi
 
-Full-stack React + Node.js + Tailwind CSS product website.
+রাজশাহীর সেরা আম ও দেশীয় পণ্য, সরাসরি উৎস থেকে 🥭
 
-## Tech Stack
-- **Frontend**: React, Vite, Tailwind CSS, React Router
-- **Backend**: Node.js, Express, JWT Authentication
-- **Database**: Airtable (CMS)
-- **Payment**: Manual (bKash, Nagad, Rocket, Bank Transfer)
-- **Deployment**: Nginx + PM2 (Production)
+**Website:** https://pure-origin-rajshahi.vercel.app  
+**Facebook:** Pure Origin Rajshahi  
+**Contact:** 01931-112866 (WhatsApp / Call)
 
-## 🚀 Quick Start
+---
 
-### Local Development
+## Project Structure
+
+```
+pure-origin-rajshahi/
+├── frontend/        # React + Vite + Tailwind — deployed on Vercel
+└── backend/         # Python FB automation bot — deployed on Render
+```
+
+---
+
+## Frontend
+
+Premium mango selling website. Single-page, no backend needed.
+
+**Stack:** React 19, Vite, Tailwind CSS v4  
+**Deploy:** Vercel (connect repo, set root to `frontend/`)
 
 ```bash
-# Frontend
 cd frontend
 npm install
-npm run dev
+npm run dev        # http://localhost:5173
+npm run build      # production build → dist/
+```
 
-# Backend (in a separate terminal)
+---
+
+## Backend — Facebook Bot
+
+Polling-based auto-reply bot for the Pure Origin Rajshahi Facebook page.
+- Replies to post **comments** with a friendly AI response
+- Replies to **Messenger inbox** with mango info or AI reply
+- Posts **daily offers** automatically at 10:00 and 18:00 (BD time)
+
+**Stack:** Python, Flask, Groq AI (llama-3.3-70b), Facebook Graph API v25  
+**Deploy:** Render
+
+### Setup
+
+```bash
 cd backend
-npm install
-cp .env.example .env  # Configure your environment variables
-npm start
+python -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
-### Environment Variables
+Copy `.env` and fill in your credentials:
+```
+APP_ID=
+APP_SECRET=
+PAGE_ACCESS_TOKEN=
+PAGE_ID=1048132561723449
+VERIFY_TOKEN=
+GROQ_API_KEY=
+GROQ_API_KEY2=
+...
+```
 
-Create `.env` files for both frontend and backend:
+### Run locally
 
-**Frontend (.env)**:
 ```bash
-VITE_API_URL=http://localhost:4242
-VITE_APP_URL=http://localhost:5173
-VITE_AIRTABLE_BASE_ID=app...
-VITE_AIRTABLE_TABLE_NAME=Products Info
-VITE_AIRTABLE_PAT=pat...
-VITE_GROQ_API_KEY=gsk_...
+# Foreground (recommended for testing)
+./start.sh
+
+# Background (keep alive after terminal close)
+./start.sh --bg
+tail -f bot.log          # watch logs
+kill $(cat bot.pid)      # stop
 ```
 
-**Backend (.env)**:
+### Manual post to page
+
 ```bash
-PORT=4242
-NODE_ENV=development
-FRONTEND_URL=http://localhost:5173
-JWT_SECRET=your-super-secret-jwt-key
-JWT_EXPIRES_IN=7d
-JWT_REFRESH_SECRET=your-refresh-token-secret
-AIRTABLE_PAT=pat...
-AIRTABLE_BASE_ID=app...
-AIRTABLE_TABLE_NAME=Products Info
-AIRTABLE_USERS_TABLE_ID=tbl...
-AIRTABLE_ORDERS_TABLE_ID=tbl...
-AIRTABLE_PRODUCTS_TABLE_ID=tbl...
-AIRTABLE_PROMO_CODES_TABLE_ID=tbl...
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASSWORD=your-app-password
-EMAIL_FROM=your-email@gmail.com
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
+python post_offer.py                 # full mango list
+python post_offer.py himsagar
+python post_offer.py langra
+python post_offer.py gopalbhog
+python post_offer.py amrapali
+python post_offer.py fazli
+python post_offer.py haribhanga
 ```
 
-## 🚀 Production Deployment
+### Deploy to Render
 
-### Manual Deployment
+1. Connect this repo on [render.com](https://render.com)
+2. Set **Root Directory** → `backend`
+3. Set **Start Command** → `gunicorn server:app --bind 0.0.0.0:$PORT --timeout 120`
+4. Add all `.env` variables in Render's Environment tab
+5. Add UptimeRobot to ping `/health` every 5 minutes
 
-1. **Build the application:**
-```bash
-# Frontend
-cd frontend
-npm install
-npm run build
+---
 
-# Backend
-cd ../backend
-npm install --production
-```
+## Facebook App Permissions Required
 
-2. **Deploy Frontend:**
-```bash
-# Copy built files to web server
-sudo cp -r frontend/dist/* /var/www/html/
-sudo chown -R www-data:www-data /var/www/html
-sudo chmod -R 755 /var/www/html
-```
+`pages_read_engagement` · `pages_manage_engagement` · `pages_messaging` · `pages_manage_posts`
 
-3. **Deploy Backend:**
-```bash
-# Start or restart backend with PM2
-pm2 restart backend || pm2 start ecosystem.config.cjs --only backend --env production
-pm2 save
-```
+---
 
-4. **Restart Nginx:**
-```bash
-sudo systemctl restart nginx
-```
+## Mango Products
 
-### Monitoring
-
-Check application status:
-```bash
-# PM2 status
-pm2 list
-pm2 logs backend --lines 50
-
-# Nginx status
-sudo systemctl status nginx
-sudo tail -f /var/log/nginx/access.log
-sudo tail -f /var/log/nginx/error.log
-
-# Health check
-curl http://localhost/health
-```
-
-## 📁 Project Structure
-
-```
-my-react-app/
-├── frontend/              # React frontend application
-│   ├── src/
-│   │   ├── components/    # Reusable UI components
-│   │   │   ├── Button.jsx
-│   │   │   ├── FloatingChatbot.jsx
-│   │   │   ├── Footer.jsx
-│   │   │   ├── HeroCarousel.jsx
-│   │   │   ├── Navbar.jsx
-│   │   │   └── ProtectedRoute.jsx
-│   │   ├── pages/         # Page components
-│   │   │   ├── LoginPage.jsx
-│   │   │   ├── RegisterPage.jsx
-│   │   │   ├── ProductPage.jsx
-│   │   │   ├── AdminPage.jsx
-│   │   │   ├── user/     # User dashboard pages
-│   │   │   └── admin/    # Admin dashboard pages
-│   │   ├── layouts/       # Layout components
-│   │   ├── context/       # React context (AuthContext)
-│   │   └── styles/        # Global styles
-│   ├── public/           # Static assets
-│   └── package.json
-├── backend/              # Node.js Express backend
-│   ├── controllers/     # Route controllers
-│   │   ├── authController.js
-│   │   ├── productsController.js
-│   │   ├── ordersController.js
-│   │   └── promoCodesController.js
-│   ├── middleware/      # Express middleware
-│   │   ├── auth.js
-│   │   ├── admin.js
-│   │   └── rateLimiter.js
-│   ├── services/        # Business logic & external services
-│   │   ├── airtableUserService.js
-│   │   ├── airtableProductService.js
-│   │   ├── airtableOrderService.js
-│   │   ├── airtablePromoCodeService.js
-│   │   └── emailService.js
-│   ├── server.js        # Express app entry point
-│   └── package.json
-├── .github/
-│   └── workflows/
-│       └── deploy.yml   # GitHub Actions deployment workflow
-├── nginx.conf           # Nginx configuration for reverse proxy
-├── ecosystem.config.cjs # PM2 process manager configuration
-├── scripts/            # Deployment and setup scripts
-│   ├── manual-deploy.sh
-└── README.md
-```
-
-## 🔧 Features
-
-### User Features
-- User registration and email verification
-- JWT-based authentication
-- Product browsing and purchasing
-- Manual payment via bKash, Nagad, Rocket, or Bank Transfer
-- User dashboard (purchases, transactions)
-- Password reset functionality
-- AI-powered chatbot (Groq API)
-
-### Admin Features
-- Admin dashboard
-- Product management via Airtable CMS
-- Promo code management
-- User management
-- Transaction monitoring
-- Analytics and indicators
-
-### Technical Features
-- Rate limiting for API endpoints
-- Email notifications
-- Secure password hashing
-- Protected routes
-- Responsive design (Tailwind CSS)
-- SEO-friendly structure
-
-## 🐛 Troubleshooting
-
-### Deployment Issues
-1. **Build errors** - Check if all dependencies are properly installed
-2. **Nginx 502 error** - Verify backend is running: `pm2 list`
-3. **Port conflicts** - Ensure ports 80 and 4242 are available
-
-### Common Issues
-- **Environment variables not working** - Check .env files are properly configured
-- **Stripe webhook errors** - Verify STRIPE_WEBHOOK_SECRET matches Stripe dashboard
-- **Airtable connection issues** - Check AIRTABLE_PAT and base/table IDs
-- **Email not sending** - Verify EMAIL_PASSWORD is an app password (not account password)
-
-## 📝 API Documentation
-
-See `API_DOCUMENTATION.md` for detailed API endpoints and usage examples.
-
-## 📄 License
-
-This project is private and confidential.
+| Variety | Season | Price |
+|---|---|---|
+| হিমসাগর (Himsagar) | মে–জুন | ১৮০–২৫০ ৳/কেজি |
+| গোপালভোগ (Gopalbhog) | মে–জুন | ২০০–২৮০ ৳/কেজি |
+| ল্যাংড়া (Langra) | জুন–জুলাই | ১৫০–২০০ ৳/কেজি |
+| আম্রপালি (Amrapali) | জুলাই–আগস্ট | ১২০–১৬০ ৳/কেজি |
+| ফজলি (Fazli) | জুলাই–আগস্ট | ১৩০–১৮০ ৳/কেজি |
+| হরিভাঙ্গা (Haribhanga) | জুলাই–আগস্ট | ১৬০–২২০ ৳/কেজি |
