@@ -1,7 +1,8 @@
 services:
   - type: web
-    name: fb-offer-bot
+    name: pure-origin-rajshahi-bot
     runtime: python
+    rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn server:app --bind 0.0.0.0:$PORT --timeout 120
     plan: free
