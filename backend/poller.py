@@ -29,7 +29,13 @@ POLL_INTERVAL = 15  # seconds
 # ── Daily auto-post schedule (Bangladesh time) ────────────────────────────────
 # Format: (time "HH:MM", post_type)
 AUTO_POSTS = [
-    ("15:25", "sheet"),  # 3:25 PM BD time — reads from Google Sheet
+    ("10:00", "sheet"),
+    ("12:00", "sheet"),
+    ("14:00", "sheet"),
+    ("16:00", "sheet"),
+    ("18:00", "sheet"),
+    ("20:00", "sheet"),
+    ("22:00", "sheet"),
 ]
 
 _posted_today: set = set()

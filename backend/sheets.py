@@ -3,6 +3,7 @@ Google Sheets integration via Apps Script web app.
 Calls the script URL to get next post (row 2) and delete it atomically.
 """
 import os
+import re
 import logging
 import requests
 
@@ -12,6 +13,16 @@ SCRIPT_URL = os.getenv(
     "GOOGLE_SCRIPT_URL",
     "https://script.google.com/macros/s/AKfycbyPgwe-N-k7AbWgSGFQuO2RRuvglUvk0yxb0Nvx0btsG5BhIKgco8L988TRsosNtB_M/exec",
 )
+
+
+def _fix_image_url(url: str) -> str:
+    """Convert Google Drive share links to direct download URLs."""
+    if not url:
+        return url
+    match = re.search(r'/d/([a-zA-Z0-9_-]+)', url)
+    if match:
+        return f"https://drive.google.com/uc?export=download&id={match.group(1)}"
+    return url
 
 
 def get_next_post():
@@ -27,7 +38,7 @@ def get_next_post():
         resp.raise_for_status()
         data = resp.json()
         post = data.get("post") or None
-        image = data.get("image") or None
+        image = _fix_image_url(data.get("image") or "")
         if post:
             logger.info("Got post from sheet: %.60s...", post)
         else:
