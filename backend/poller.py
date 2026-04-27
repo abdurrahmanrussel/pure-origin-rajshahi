@@ -15,6 +15,7 @@ BD_TZ = timedelta(hours=6)  # Bangladesh = UTC+6
 
 from config import PAGE_ACCESS_TOKEN, PAGE_ID
 from ai import generate_comment_reply, generate_inbox_reply, detect_mango, is_list_request, PRE_SEASON_MSG
+from sheets import get_next_post, delete_posted_row
 
 logging.basicConfig(
     level=logging.INFO,
@@ -27,7 +28,9 @@ POLL_INTERVAL = 15  # seconds
 
 # ── Daily auto-post schedule (Bangladesh time) ────────────────────────────────
 # Format: (time "HH:MM", post_type)
-AUTO_POSTS = []  # disabled — pre-season, mangoes not ripe yet
+AUTO_POSTS = [
+    ("15:25", "sheet"),  # 3:25 PM BD time — reads from Google Sheet
+]
 
 _posted_today: set = set()
 _last_post_date = None
@@ -257,16 +260,24 @@ def check_inbox(reply=True):
 
 # ── Scheduled daily posts ─────────────────────────────────────────────────────
 
-def post_to_page(message: str):
-    resp = requests.post(
-        f"{GRAPH}/{PAGE_ID}/feed",
-        data={"message": message, "access_token": PAGE_ACCESS_TOKEN},
-        timeout=10,
-    )
+def post_to_page(message: str, image_url: str = None):
+    if image_url:
+        resp = requests.post(
+            f"{GRAPH}/{PAGE_ID}/photos",
+            data={"url": image_url, "message": message, "access_token": PAGE_ACCESS_TOKEN},
+            timeout=15,
+        )
+    else:
+        resp = requests.post(
+            f"{GRAPH}/{PAGE_ID}/feed",
+            data={"message": message, "access_token": PAGE_ACCESS_TOKEN},
+            timeout=15,
+        )
     if resp.ok:
-        logger.info("Auto-post published. ID: %s", resp.json().get("id"))
+        logger.info("Auto-post published. ID: %s", resp.json().get("id", resp.json().get("post_id")))
     else:
         logger.error("Auto-post failed: %s", resp.text)
+    return resp.ok
 
 
 def check_scheduled_post():
@@ -285,10 +296,21 @@ def check_scheduled_post():
             continue
         if current_time < post_time:
             continue
-        message = build_auto_post(post_type)
-        post_to_page(message)
         _posted_today.add(post_time)
-        logger.info("Auto-posted: %s", post_type)
+
+        if post_type == "sheet":
+            post_text, image_url = get_next_post()
+            if not post_text:
+                logger.info("No post in sheet for %s — skipping.", post_time)
+                continue
+            success = post_to_page(post_text, image_url)
+            if success:
+                delete_posted_row()
+            logger.info("Sheet auto-post done at %s.", post_time)
+        else:
+            message = build_auto_post(post_type)
+            post_to_page(message)
+            logger.info("Auto-posted: %s", post_type)
 
 
 # ── Main loop ─────────────────────────────────────────────────────────────────
