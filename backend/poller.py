@@ -14,7 +14,7 @@ from datetime import datetime, timezone, timedelta
 BD_TZ = timedelta(hours=6)  # Bangladesh = UTC+6
 
 from config import PAGE_ACCESS_TOKEN, PAGE_ID
-from ai import generate_comment_reply, generate_inbox_reply, detect_mango, is_list_request, MANGO_LIST
+from ai import generate_comment_reply, generate_inbox_reply, detect_mango, is_list_request, PRE_SEASON_MSG
 
 logging.basicConfig(
     level=logging.INFO,
@@ -27,10 +27,7 @@ POLL_INTERVAL = 15  # seconds
 
 # ── Daily auto-post schedule (Bangladesh time) ────────────────────────────────
 # Format: (time "HH:MM", post_type)
-AUTO_POSTS = [
-    ("10:00", "morning"),
-    ("18:00", "evening"),
-]
+AUTO_POSTS = []  # disabled — pre-season, mangoes not ripe yet
 
 _posted_today: set = set()
 _last_post_date = None
@@ -238,9 +235,9 @@ def check_inbox(reply=True):
     if "image" in attach_types and not user_text:
         return
 
-    # Full list request → serve product list directly (no AI)
+    # Full list request → pre-season message (no AI)
     if is_list_request(user_text):
-        send_message(sender_id, MANGO_LIST)
+        send_message(sender_id, PRE_SEASON_MSG)
         return
 
     # Specific mango inquiry → AI with mango context injected
