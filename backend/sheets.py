@@ -9,10 +9,7 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-SCRIPT_URL = os.getenv(
-    "GOOGLE_SCRIPT_URL",
-    "https://script.google.com/macros/s/AKfycbyPgwe-N-k7AbWgSGFQuO2RRuvglUvk0yxb0Nvx0btsG5BhIKgco8L988TRsosNtB_M/exec",
-)
+SCRIPT_URL = os.getenv("GOOGLE_SCRIPT_URL")
 
 
 def _fix_image_url(url: str) -> str:
@@ -33,6 +30,9 @@ def get_next_post():
 
     Returns (post_text, image_url) or (None, None) if sheet is empty.
     """
+    if not SCRIPT_URL:
+        logger.error("GOOGLE_SCRIPT_URL env var not set.")
+        return None, None
     try:
         resp = requests.get(SCRIPT_URL, timeout=20)
         resp.raise_for_status()
