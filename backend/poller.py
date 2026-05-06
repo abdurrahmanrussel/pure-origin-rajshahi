@@ -27,15 +27,12 @@ GRAPH = "https://graph.facebook.com/v25.0"
 POLL_INTERVAL = 15  # seconds
 
 # ── Daily auto-post schedule (Bangladesh time) ────────────────────────────────
-# Format: (time "HH:MM", post_type)
+# Every 30 minutes from 10:00 to 23:00 BD time
 AUTO_POSTS = [
-    ("10:00", "sheet"),
-    ("12:00", "sheet"),
-    ("14:00", "sheet"),
-    ("16:00", "sheet"),
-    ("18:00", "sheet"),
-    ("20:00", "sheet"),
-    ("22:00", "sheet"),
+    (f"{h:02d}:{m:02d}", "sheet")
+    for h in range(10, 24)
+    for m in (0, 30)
+    if h < 23 or m == 0  # last slot: 23:00, not 23:30
 ]
 
 _posted_today: set = set()

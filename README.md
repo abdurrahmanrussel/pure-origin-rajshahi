@@ -63,6 +63,7 @@ VERIFY_TOKEN=
 GROQ_API_KEY=
 GROQ_API_KEY2=
 ...
+GOOGLE_SCRIPT_URL=   # Apps Script web app URL
 ```
 
 ### Run locally
@@ -87,6 +88,32 @@ python post_offer.py gopalbhog
 python post_offer.py amrapali
 python post_offer.py fazli
 python post_offer.py haribhanga
+```
+
+### Queue scheduled posts (local only)
+
+Posts are read from Google Sheet and auto-published at scheduled times.
+Images are pulled from the Google Drive folder automatically (cycles through all images).
+
+**Step 1 — Download images by keyword**
+```bash
+python download_images.py "mango fruit rajshahi" 100
+python download_images.py "রাজশাহীর আম" 50
+```
+Saves to `downloaded_images/<keyword>/`. Upload that folder to Google Drive image folder.
+
+**Step 2 — Write posts in `posts.txt`**
+```
+১. First post text here
+২. Second post text here
+৩. Third post text here
+```
+
+**Step 3 — Upload to queue**
+```bash
+python add_post.py           # preview + upload all from posts.txt
+python add_post.py --list    # see current queue
+python add_post.py --clear   # clear queue
 ```
 
 ### Deploy to Render
