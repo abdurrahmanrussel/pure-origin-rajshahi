@@ -329,8 +329,8 @@ def main():
         len(replied_messages),
     )
     logger.info("Polling every %ds. Press Ctrl+C to stop.", POLL_INTERVAL)
-    for t, pt in AUTO_POSTS:
-        logger.info("Auto-post scheduled: %s at %s daily (BD time).", pt, t)
+    logger.info("Auto-post schedule: %s → %s BD time, every 30min (%d slots).",
+                AUTO_POSTS[0], AUTO_POSTS[-1], len(AUTO_POSTS))
 
     while True:
         time.sleep(POLL_INTERVAL)
