@@ -15,7 +15,7 @@ BD_TZ = timedelta(hours=6)  # Bangladesh = UTC+6
 
 from config import PAGE_ACCESS_TOKEN, PAGE_ID
 from ai import generate_comment_reply, generate_inbox_reply, detect_mango, is_list_request, PRE_SEASON_MSG
-from sheets import get_next_post, delete_posted_row
+from sheets import get_next_post
 
 logging.basicConfig(
     level=logging.INFO,
@@ -27,12 +27,12 @@ GRAPH = "https://graph.facebook.com/v25.0"
 POLL_INTERVAL = 15  # seconds
 
 # ── Daily auto-post schedule (Bangladesh time) ────────────────────────────────
-# Every 30 minutes from 10:00 to 23:00 BD time
 AUTO_POSTS = [
-    (f"{h:02d}:{m:02d}", "sheet")
-    for h in range(10, 24)
-    for m in (0, 30)
-    if h < 23 or m == 0  # last slot: 23:00, not 23:30
+    "10:00", "10:30", "11:00", "11:30", "12:00", "12:30",
+    "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
+    "16:00", "16:30", "17:00", "17:30", "18:00", "18:30",
+    "19:00", "19:30", "20:00", "20:30", "21:00", "21:30",
+    "22:00", "22:30", "23:00",
 ]
 
 _posted_today: set = set()
@@ -292,28 +292,25 @@ def check_scheduled_post():
         _posted_today = set()
         _last_post_date = today
 
-    current_time = now.strftime("%H:%M")
+    now_minutes = now.hour * 60 + now.minute
 
-    for post_time, post_type in AUTO_POSTS:
+    for post_time in AUTO_POSTS:
         if post_time in _posted_today:
             continue
-        if current_time < post_time:
+        ph, pm = map(int, post_time.split(":"))
+        slot_minutes = ph * 60 + pm
+        diff = now_minutes - slot_minutes
+        # only fire within a 10-minute window after scheduled time
+        if not (0 <= diff < 10):
             continue
         _posted_today.add(post_time)
 
-        if post_type == "sheet":
-            post_text, image_url = get_next_post()
-            if not post_text:
-                logger.info("No post in sheet for %s — skipping.", post_time)
-                continue
-            success = post_to_page(post_text, image_url)
-            if success:
-                delete_posted_row()
-            logger.info("Sheet auto-post done at %s.", post_time)
-        else:
-            message = build_auto_post(post_type)
-            post_to_page(message)
-            logger.info("Auto-posted: %s", post_type)
+        post_text, image_url = get_next_post()
+        if not post_text:
+            logger.info("No post in sheet for %s — skipping.", post_time)
+            continue
+        post_to_page(post_text, image_url)
+        logger.info("Sheet auto-post done at %s.", post_time)
 
 
 # ── Main loop ─────────────────────────────────────────────────────────────────
